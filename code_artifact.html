@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق أتحبني؟ - رعاية روحية وشركة كنسية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo for UI & Amiri for Biblical Verses -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tone.js for gentle spiritual chime feedback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        amiri: ['Amiri', 'serif'],
+                    },
+                    colors: {
+                        ivory: '#FDFBF7',
+                        parchment: '#F5EFE6',
+                        gold: {
+                            light: '#E6C665',
+                            DEFAULT: '#C59B27',
+                            dark: '#9A7414',
+                        },
+                        burgundy: {
+                            light: '#9E2A35',
+                            DEFAULT: '#7C1D26',
+                            dark: '#581219',
+                        },
+                        midnight: {
+                            DEFAULT: '#0F172A',
+                            card: '#1E293B',
+                            soft: '#334155'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-verse {
+            font-family: 'Amiri', serif;
+            line-height: 1.9;
+        }
+        /* Hide scrollbars inside phone container while keeping scroll functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Subtle Coptic Geometric Pattern Overlay */
+        .coptic-pattern {
+            background-image: radial-gradient(rgba(197, 155, 39, 0.14) 1px, transparent 1px),
+                              radial-gradient(rgba(124, 29, 38, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #7C1D26 0%, #581219 55%, #3A0B10 100%);
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #C59B27 50%, #AA8010 100%);
+        }
+        .gold-border-glow {
+            box-shadow: 0 4px 20px -2px rgba(197, 155, 39, 0.22);
+        }
+        @keyframes pulse-gentle {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.06); opacity: 1; }
+        }
+        .animate-pulse-gentle {
+            animation: pulse-gentle 3s infinite ease-in-out;
+        }
+        @keyframes sound-wave {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+        .wave-bar {
+            width: 3px;
+            background-color: #E6C665;
+            border-radius: 999px;
+             display: inline-block;
+        }
+        .playing .wave-1 { animation: sound-wave 0.7s infinite ease-in-out 0.1s; }
+        .playing .wave-2 { animation: sound-wave 0.7s infinite ease-in-out 0.3s; }
+        .playing .wave-3 { animation: sound-wave 0.7s infinite ease-in-out 0.2s; }
+        .playing .wave-4 { animation: sound-wave 0.7s infinite ease-in-out 0.4s; }
+    </style>
+</head>
+<body class="bg-stone-200 dark:bg-slate-950 min-h-screen flex flex-col items-center justify-center p-0 sm:p-4 transition-colors duration-300 coptic-pattern">
+
+    <!-- Top Desktop Controls Bar (Outside Phone Frame) -->
+    <div id="desktopToolbar" class="hidden sm:flex items-center justify-between w-full max-w-[430px] mb-3 px-4 py-2 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-sm border border-gold/20 text-xs text-stone-700 dark:text-stone-300">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="font-bold text-burgundy dark:text-gold-light">نموذج تفاعلي لتطبيق «أتحبني؟»</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleFullScreenMode()" class="px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-slate-800 hover:bg-gold/20 transition flex items-center gap-1.5 font-medium" title="تبديل عرض ملء الشاشة">
+                <i class="fa-solid fa-expand text-gold-dark dark:text-gold-light"></i>
+                <span id="frameToggleText">ملء الشاشة</span>
+            </button>
+            <button onclick="toggleTheme()" class="px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-slate-800 hover:bg-gold/20 transition flex items-center gap-1.5 font-medium">
+                <i id="outerThemeIcon" class="fa-solid fa-moon text-burgundy dark:text-gold-light"></i>
+                <span id="outerThemeText">الوضع الليلي</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Phone Frame Container -->
+    <div id="phoneFrame" class="relative w-full sm:w-[420px] h-screen sm:h-[860px] bg-ivory dark:bg-midnight text-stone-800 dark:text-stone-100 sm:rounded-[46px] sm:shadow-2xl sm:border-[10px] sm:border-stone-900 dark:sm:border-slate-800 overflow-hidden flex flex-col transition-all duration-300">
+
+        <!-- Simulated Mobile Status Bar -->
+        <div class="bg-ivory/90 dark:bg-midnight/90 backdrop-blur-md px-6 pt-2.5 pb-1.5 flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-stone-400 z-30 shrink-0">
+            <div class="flex items-center gap-1.5">
+                <span id="statusTime">٠٩:٤١ ص</span>
+                <span class="text-gold-dark dark:text-gold-light">•</span>
+                <span>الأحد</span>
+            </div>
+            <!-- Notch / Dynamic Island graphic on Desktop -->
+            <div class="hidden sm:flex items-center justify-center w-24 h-4 bg-stone-900 dark:bg-black rounded-full">
+                <span class="w-2 h-2 rounded-full bg-stone-800 mr-8"></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-signal text-[10px]"></i>
+                <i class="fa-solid fa-wifi text-[10px]"></i>
+                <i class="fa-solid fa-battery-full text-xs text-emerald-600 dark:text-emerald-400"></i>
+            </div>
+        </div>
+
+        <!-- TOP APP HEADER -->
+        <header class="px-5 pt-2 pb-3 bg-ivory/95 dark:bg-midnight/95 backdrop-blur-md border-b border-gold/15 z-20 shrink-0">
+            <div class="flex items-center justify-between">
+                <!-- App Identity & Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="relative w-11 h-11 rounded-2xl hero-gradient flex items-center justify-center shadow-md border border-gold/40">
+                        <!-- Coptic Cross & Heart SVG -->
+                        <svg class="w-6 h-6 text-gold-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20M5 9h14M9 4.5L12 2l3 2.5M9 19.5L12 22l3-2.5M6.5 6.5L4 9l2.5 2.5M17.5 6.5L20 9l-2.5 2.5"/>
+                        </svg>
+                        <span class="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-gold text-white text-[9px] flex items-center justify-center shadow">
+                            <i class="fa-solid fa-dove"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl font-extrabold tracking-tight text-burgundy dark:text-gold-light">أَتُحِبُّنِي؟</h1>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold-dark dark:text-gold-light font-semibold border border-gold/30">يو ٢١: ١٥</span>
+                        </div>
+                        <p class="text-[11px] text-stone-500 dark:text-stone-400 font-medium">سلام ونعمة يا مينا • كنيسة السيدة العذراء</p>
+                    </div>
+                </div>
+
+                <!-- Header Right Actions: Streak, Theme, Notifications -->
+                <div class="flex items-center gap-1.5">
+                    <!-- Spiritual Streak Pill -->
+                    <button onclick="showToast('بركة كبيرة! واظبت على قانونك الروحي ٧ أيام متتالية 🔥')" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold hover:scale-105 transition" title="أيام المواظبة">
+                        <i class="fa-solid fa-fire text-amber-500 animate-pulse"></i>
+                        <span id="streakCounter">٧</span>
+                    </button>
+
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-parchment dark:bg-midnight-card border border-gold/20 flex items-center justify-center text-stone-600 dark:text-gold-light hover:bg-gold/15 transition">
+                        <i id="innerThemeIcon" class="fa-solid fa-moon text-sm"></i>
+                    </button>
+
+                    <!-- Notification Bell -->
+                    <button onclick="openModal('notificationsModal')" class="relative w-9 h-9 rounded-xl bg-parchment dark:bg-midnight-card border border-gold/20 flex items-center justify-center text-stone-600 dark:text-stone-300 hover:bg-gold/15 transition">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span class="absolute top-1.5 right-2 w-2 h-2 bg-burgundy rounded-full ring-2 ring-ivory dark:ring-midnight"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Coptic Date & Synaxarium Bar -->
+            <div onclick="openModal('synaxariumModal')" class="mt-2.5 px-3 py-1.5 rounded-xl bg-parchment/90 dark:bg-midnight-card/90 border border-gold/25 flex items-center justify-between text-xs cursor-pointer hover:border-gold transition">
+                <div class="flex items-center gap-2 truncate">
+                    <i class="fa-solid fa-calendar-day text-burgundy dark:text-gold-light"></i>
+                    <span class="font-bold text-stone-700 dark:text-stone-200">٢٣ بابة ١٧٤٣ ش</span>
+                    <span class="text-stone-400">|</span>
+                    <span class="text-stone-600 dark:text-stone-300 truncate">تذكار استشهاد القديس ديونيسيوس الأسقف</span>
+                </div>
+                <span class="text-[11px] text-burgundy dark:text-gold-light font-bold shrink-0 flex items-center gap-1 mr-2">
+                    السنكسار <i class="fa-solid fa-chevron-left text-[9px]"></i>
+                </span>
+            </div>
+        </header>
+
+        <!-- MAIN SCROLLABLE CONTENT AREA -->
+        <main id="mainScrollArea" class="flex-1 overflow-y-auto no-scrollbar pb-28 px-4 pt-3 space-y-5">
+
+            <!-- ========================================== -->
+            <!-- TAB 1: HOME VIEW (الواجهة الرئيسية)        -->
+            <!-- ========================================== -->
+            <div id="view-home" class="space-y-5">
+
+                <!-- 1. HERO CARD: Daily Verse & Personal Message -->
+                <section class="relative rounded-3xl hero-gradient text-white p-5 shadow-lg overflow-hidden border border-gold/40">
+                    <!-- Decorative SVG Cross Watermark -->
+                    <div class="absolute -left-6 -bottom-6 opacity-10 pointer-events-none">
+                        <svg class="w-40 h-40 text-gold" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/>
+                        </svg>
+                    </div>
+
+                    <!-- Top Badge & Bookmark -->
+                    <div class="flex items-center justify-between mb-3 relative z-10">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-gold-light text-xs font-semibold border border-gold/30">
+                            <i class="fa-solid fa-sparkles text-[10px]"></i>
+                            رسالة المسيح لك اليوم
+                        </span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="cycleDailyVerse()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs text-gold-light transition" title="آية أخرى">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                            <button id="favVerseBtn" onclick="toggleFavoriteVerse()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs text-white transition" title="حفظ في المفضلة">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Biblical Verse Text -->
+                    <div class="relative z-10 my-2 text-center px-1">
+                        <p id="heroVerseText" class="font-verse text-xl sm:text-2xl font-bold text-amber-50 leading-relaxed drop-shadow-sm">
+                            «يَا سِمْعَانُ بْنَ يُونَا، أَتُحِبُّنِي أَكْثَرَ مِنْ هؤُلاءِ؟ قَالَ لَهُ: نَعَمْ يَا رَبُّ أَنْتَ تَعْلَمُ أَنِّي أُحِبُّكَ. قَالَ لَهُ: ارْعَ خِرَافِي»
+                        </p>
+                        <p id="heroVerseRef" class="mt-1.5 text-xs text-gold-light font-semibold tracking-wide">
+                            — إنجيل يوحنا ٢١: ١٥
+                        </p>
+                    </div>
+
+                    <!-- Brief Spiritual Reflection -->
+                    <div class="mt-3 p-3 rounded-2xl bg-black/25 backdrop-blur-xs border border-white/10 text-xs text-stone-200 leading-relaxed relative z-10">
+                        <strong class="text-gold-light">همسة لمينا:</strong> الله لا يسألك اليوم عن كثرة أعمالك أو أخطائك، بل يسأل عن قلبك: «أتحبني؟». كل بداية جديدة تبدأ بكلمة "أنت تعلم يا رب أني أحبك".
+                    </div>
+
+                    <!-- Interactive Action Buttons -->
+                    <div class="mt-4 flex items-center gap-2.5 relative z-10">
+                        <button onclick="toggleAudioMeditation('تأمل الصباح: أتحبني أكثر من هؤلاء؟', 'أبونا داود لمعي • ٣:٤٥ د')" class="flex-1 py-2.5 px-3 rounded-xl gold-gradient text-stone-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:brightness-105 active:scale-98 transition">
+                            <i id="heroAudioIcon" class="fa-solid fa-headphones-simple text-sm"></i>
+                            <span>سماع التأمل الصوتي (٣ د)</span>
+                        </button>
+                        <button onclick="copyDailyVerse()" class="py-2.5 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs flex items-center gap-1.5 border border-white/20 transition">
+                            <i class="fa-solid fa-share-nodes"></i>
+                            <span>مشاركة</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 2. INTERACTIVE DAILY SPIRITUAL RULE (قانوني الروحي اليومي) -->
+                <section class="bg-white dark:bg-midnight-card rounded-3xl p-4 shadow-sm border border-gold/20 gold-border-glow">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-xl bg-burgundy/10 dark:bg-gold/15 flex items-center justify-center text-burgundy dark:text-gold-light">
+                                <i class="fa-solid fa-list-check text-sm"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-sm font-bold text-stone-800 dark:text-white">قانوني الروحي اليومي</h2>
+                                <p class="text-[11px] text-stone-500 dark:text-stone-400">الأمين في القليل أمين أيضاً في الكثير</p>
+                            </div>
+                        </div>
+                        <div class="text-left">
+                            <span id="ruleProgressBadge" class="inline-block px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold text-xs border border-emerald-500/20">
+                                ٥٠٪ مكتمل
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full h-2 bg-stone-100 dark:bg-slate-700 rounded-full overflow-hidden my-3">
+                        <div id="ruleProgressBar" class="h-full gold-gradient rounded-full transition-all duration-500" style="width: 50%"></div>
+                    </div>
+
+                    <!-- Checklist Grid (2x2 on mobile) -->
+                    <div id="homeChecklistContainer" class="grid grid-cols-2 gap-2.5 mt-3">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </section>
+
+                <!-- 3. QUICK ACCESS SPIRITUAL SECTIONS (أقسام التطبيق الروحية) -->
+                <section>
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <h2 class="text-sm font-extrabold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+                            <span class="w-1.5 h-4 rounded-full bg-burgundy dark:bg-gold"></span>
+                            واحة الكنيسة والروحيات
+                        </h2>
+                        <span class="text-[11px] text-stone-500 dark:text-stone-400">اختر قسماً للتفاعل</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <!-- Card 1: Agpeya -->
+                        <button onclick="switchTab('agpeya')" class="group p-3.5 rounded-2xl bg-white dark:bg-midnight-card border border-gold/20 hover:border-gold shadow-xs flex flex-col items-center text-center transition hover:-translate-y-0.5">
+                            <div class="w-12 h-12 rounded-2xl bg-burgundy/10 dark:bg-burgundy/30 text-burgundy dark:text-gold-light flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-hands-praying"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-800 dark:text-stone-100">الأجبية المقدسة</span>
+                            <span class="text-[10px] text-stone-400 mt-0.5">٧ صلوات نهارية</span>
+                        </button>
+
+                        <!-- Card 2: Holy Bible & Katameros -->
+                        <button onclick="openKatamerosModal()" class="group p-3.5 rounded-2xl bg-white dark:bg-midnight-card border border-gold/20 hover:border-gold shadow-xs flex flex-col items-center text-center transition hover:-translate-y-0.5">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-book-bible"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-800 dark:text-stone-100">الكتاب والقطمارس</span>
+                            <span class="text-[10px] text-stone-400 mt-0.5">قراءات اليوم</span>
+                        </button>
+
+                        <!-- Card 3: Hymns & Praises -->
+                        <button onclick="openHymnsModal()" class="group p-3.5 rounded-2xl bg-white dark:bg-midnight-card border border-gold/20 hover:border-gold shadow-xs flex flex-col items-center text-center transition hover:-translate-y-0.5">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-music"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-800 dark:text-stone-100">ترانيم وألحان</span>
+                            <span class="text-[10px] text-stone-400 mt-0.5">تسبحة وعظات</span>
+                        </button>
+
+                        <!-- Card 4: Confession & Repentance -->
+                        <button onclick="switchTab('rule')" class="group p-3.5 rounded-2xl bg-white dark:bg-midnight-card border border-gold/20 hover:border-gold shadow-xs flex flex-col items-center text-center transition hover:-translate-y-0.5">
+                            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-800 dark:text-stone-100">ركن التوبة</span>
+                            <span class="text-[10px] text-stone-400 mt-0.5">محاسبة النَفْس 🔒</span>
+                        </button>
+
+                        <!-- Card 5: Prayer Requests Wall -->
+                        <button onclick="switchTab('community')" class="group p-3.5 rounded-2xl bg-white dark:bg-midnight-card border border-gold/20 hover:border-gold shadow-xs flex flex-col items-center text-center transition hover:-translate-y-0.5">
+                            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-700 dark:text-rose-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-heart-pulse"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-800 dark:text-stone-100">حائط الصلاة</span>
+                            <span class="text-[10px] text-stone-400 mt-0.5">صلوا بعضكم لأجل بعض</span>
+                        </button>
+
+                        <!-- Card 6: Ask a Father / Spiritual Question -->
+                        <button onclick="openAskFatherModal()" class="group p-3.5 rounded-2xl bg-white dark:bg-midnight-card border border-gold/20 hover:border-gold shadow-xs flex flex-col items-center text-center transition hover:-translate-y-0.5">
+                            <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-700 dark:text-sky-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-800 dark:text-stone-100">إرشاد روحي</span>
+                            <span class="text-[10px] text-stone-400 mt-0.5">اسأل أب اعترافك</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 4. UPCOMING CHURCH SCHEDULE & LITURGIES (مواعيد الكنيسة والقداسات) -->
+                <section>
+                    <div class="flex items-center justify-between mb-2.5 px-1">
+                        <h2 class="text-sm font-extrabold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+                            <span class="w-1.5 h-4 rounded-full bg-gold"></span>
+                            مواعيد الكنيسة والخدمة القادمة
+                        </h2>
+                        <button onclick="switchTab('community')" class="text-xs font-bold text-burgundy dark:text-gold-light hover:underline">عرض الكل</button>
+                    </div>
+
+                    <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                        <!-- Event 1 -->
+                        <div class="min-w-[235px] bg-white dark:bg-midnight-card rounded-2xl p-3.5 border border-gold/25 shadow-xs shrink-0 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between text-[11px] mb-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-burgundy/10 dark:bg-burgundy/30 text-burgundy dark:text-gold-light font-bold">غداً صباحاً</span>
+                                    <span class="text-stone-400"><i class="fa-regular fa-clock ml-1"></i>٦:٣٠ - ٩:٠٠ ص</span>
+                                </div>
+                                <h3 class="font-bold text-sm text-stone-800 dark:text-white">القداس الإلهي الأول</h3>
+                                <p class="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">المذبح الرئيسي • أبونا يوحنا وأبونا مرقس</p>
+                            </div>
+                            <button onclick="toggleReminder(this, 'القداس الإلهي الأول')" class="mt-3 w-full py-1.5 rounded-xl bg-parchment dark:bg-slate-800 hover:bg-gold/20 text-stone-700 dark:text-stone-200 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                <i class="fa-regular fa-bell"></i>
+                                <span>تذكيري بالموعد</span>
+                            </button>
+                        </div>
+
+                        <!-- Event 2 -->
+                        <div class="min-w-[235px] bg-white dark:bg-midnight-card rounded-2xl p-3.5 border border-gold/25 shadow-xs shrink-0 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between text-[11px] mb-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold">الخميس القادم</span>
+                                    <span class="text-stone-400"><i class="fa-regular fa-clock ml-1"></i>٧:٣٠ م</span>
+                                </div>
+                                <h3 class="font-bold text-sm text-stone-800 dark:text-white">اجتماع الشباب «أتحبني؟»</h3>
+                                <p class="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">قاعة الأنبا أنطونيوس • كيف أسمع صوت الله؟</p>
+                            </div>
+                            <button onclick="toggleReminder(this, 'اجتماع الشباب')" class="mt-3 w-full py-1.5 rounded-xl bg-parchment dark:bg-slate-800 hover:bg-gold/20 text-stone-700 dark:text-stone-200 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                <i class="fa-regular fa-bell"></i>
+                                <span>تأكيد حضوري</span>
+                            </button>
+                        </div>
+
+                        <!-- Event 3 -->
+                        <div class="min-w-[235px] bg-white dark:bg-midnight-card rounded-2xl p-3.5 border border-gold/25 shadow-xs shrink-0 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between text-[11px] mb-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold">السبت</span>
+                                    <span class="text-stone-400"><i class="fa-regular fa-clock ml-1"></i>٦:٠٠ م</span>
+                                </div>
+                                <h3 class="font-bold text-sm text-stone-800 dark:text-white">عشية وتسبحة كيهك/نصف الليل</h3>
+                                <p class="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">خورس الشمامسة • يليها اعترافات الآباء</p>
+                            </div>
+                            <button onclick="toggleReminder(this, 'عشية وتسبحة السبت')" class="mt-3 w-full py-1.5 rounded-xl bg-parchment dark:bg-slate-800 hover:bg-gold/20 text-stone-700 dark:text-stone-200 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                <i class="fa-regular fa-bell"></i>
+                                <span>تذكيري بالموعد</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. FEATURED PATRISTIC QUOTE (أقوال الآباء) -->
+                <section class="bg-parchment dark:bg-slate-800/80 rounded-2xl p-4 border-r-4 border-burgundy dark:border-gold flex items-start gap-3">
+                    <i class="fa-solid fa-quote-right text-2xl text-gold/60 mt-0.5"></i>
+                    <div>
+                        <p class="font-verse text-base text-stone-800 dark:text-stone-100 font-bold">
+                            «إذا لم يكن لك صلاة، فلا تتعب نفسك؛ لأن الصلاة هي مفتاح كل الفضائل ونور العقل.»
+                        </p>
+                        <p class="text-[11px] text-burgundy dark:text-gold-light font-bold mt-1">— القديس مار إسحق السرياني</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 2: AGPEYA & BIBLE VIEW (الأجبية والكتاب) -->
+            <!-- ========================================== -->
+            <div id="view-agpeya" class="hidden space-y-4">
+                <div class="bg-white dark:bg-midnight-card rounded-3xl p-4 border border-gold/20">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h2 class="text-base font-extrabold text-burgundy dark:text-gold-light">صلوات الأجبية المقدسة</h2>
+                            <p class="text-xs text-stone-500 dark:text-stone-400">«سبع مرات في النهار سبحتك على أحكام عدلك» (مز ١١٩: ١٦٤)</p>
+                        </div>
+                        <span class="w-10 h-10 rounded-2xl bg-gold/15 text-gold-dark dark:text-gold-light flex items-center justify-center">
+                            <i class="fa-solid fa-cross text-lg"></i>
+                        </span>
+                    </div>
+
+                    <!-- Agpeya Hours Pills -->
+                    <div id="agpeyaHoursTabs" class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                        <!-- Rendered via JS -->
+                    </div>
+
+                    <!-- Active Prayer Display Box -->
+                    <div id="agpeyaContentBox" class="mt-3 p-4 rounded-2xl bg-parchment/70 dark:bg-slate-900/90 border border-gold/25 space-y-3">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Daily Bible Chapter Reader -->
+                <div class="bg-white dark:bg-midnight-card rounded-3xl p-4 border border-gold/20">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300">قراءة الإنجيل اليومي</span>
+                        <button onclick="toggleAudioMeditation('قراءة إنجيل يوحنا الأصحاح ٢١', 'بصوت رخيم • ٤:١٠ د')" class="text-xs font-bold text-burgundy dark:text-gold-light flex items-center gap-1">
+                            <i class="fa-solid fa-volume-high"></i> استماع صوتي
+                        </button>
+                    </div>
+                    <h3 class="font-bold text-sm text-stone-800 dark:text-white mb-2">إنجيل معلمنا يوحنا (الأصحاح ٢١: ١٥-١٩)</h3>
+                    <div class="font-verse text-lg leading-loose text-stone-700 dark:text-stone-200 bg-ivory dark:bg-slate-900 p-3.5 rounded-2xl border border-stone-200/70 dark:border-slate-800">
+                        <span class="text-burgundy dark:text-gold font-bold">١٥</span> فَبَعْدَ مَا تَغَدَّوْا قَالَ يَسُوعُ لِسِمْعَانَ بُطْرُسَ: «يَا سِمْعَانُ بْنَ يُونَا، أَتُحِبُّنِي أَكْثَرَ مِنْ هؤُلاءِ؟» قَالَ لَهُ: «نَعَمْ يَا رَبُّ أَنْتَ تَعْلَمُ أَنِّي أُحِبُّكَ». قَالَ لَهُ: «ارْعَ خِرَافِي».
+                        <span class="text-burgundy dark:text-gold font-bold">١٦</span> قَالَ لَهُ أَيْضاً ثَانِيَةً: «يَا سِمْعَانُ بْنَ يُونَا، أَتُحِبُّنِي؟» قَالَ لَهُ: «نَعَمْ يَا رَبُّ، أَنْتَ تَعْلَمُ أَنِّي أُحِبُّكَ». قَالَ لَهُ: «ارْعَ غَنَمِي».
+                        <span class="text-burgundy dark:text-gold font-bold">١٧</span> قَالَ لَهُ ثَالِثَةً: «يَا سِمْعَانُ بْنَ يُونَا، أَتُحِبُّنِي؟» فَحَزِنَ بُطْرُسُ لأَنَّهُ قَالَ لَهُ ثَالِثَةً: أَتُحِبُّنِي؟ فَقَالَ لَهُ: «يَا رَبُّ، أَنْتَ تَعْلَمُ كُلَّ شَيْءٍ. أَنْتَ تَعْرِفُ أَنِّي أُحِبُّكَ». قَالَ لَهُ يَسُوعُ: «ارْعَ غَنَمِي».
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 3: SPIRITUAL RULE & CONFESSION (قانوني والتوبة) -->
+            <!-- ========================================== -->
+            <div id="view-rule" class="hidden space-y-4">
+                <!-- Detailed Spiritual Rule Tracker -->
+                <div class="bg-white dark:bg-midnight-card rounded-3xl p-4 border border-gold/20">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h2 class="text-base font-extrabold text-burgundy dark:text-gold-light">متابعة قانوني الروحي</h2>
+                            <p class="text-xs text-stone-500 dark:text-stone-400">بإشراف أب الاعتراف: أبونا يوحنا</p>
+                        </div>
+                        <button onclick="addCustomSpiritualTask()" class="px-3 py-1.5 rounded-xl bg-burgundy text-white dark:bg-gold dark:text-stone-950 text-xs font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> إضافة بند
+                        </button>
+                    </div>
+                    <div id="fullChecklistContainer" class="space-y-2.5">
+                        <!-- Synced with Home checklist via JS -->
+                    </div>
+                </div>
+
+                <!-- Private Confession & Self-Examination Notebook -->
+                <div class="bg-white dark:bg-midnight-card rounded-3xl p-4 border border-gold/20">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                                <i class="fa-solid fa-lock text-sm"></i>
+                            </span>
+                            <div>
+                                <h3 class="text-sm font-bold text-stone-800 dark:text-white">مفكرة محاسبة النفس والاعتراف</h3>
+                                <p class="text-[11px] text-stone-500 dark:text-stone-400">سرية تماماً ومحفوظة على هاتفك فقط • موعد اعترافك القادم: بعد ٥ أيام</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 flex gap-2">
+                        <input id="confessionNoteInput" type="text" placeholder="اكتب نقطة تود تذكرها في الاعتراف أو طلب إرشاد..." class="flex-1 px-3.5 py-2 rounded-xl bg-parchment dark:bg-slate-900 border border-gold/25 text-xs focus:outline-none focus:border-burgundy dark:focus:border-gold">
+                        <button onclick="addConfessionNote()" class="px-4 py-2 rounded-xl hero-gradient text-white text-xs font-bold shrink-0">
+                            حفظ
+                        </button>
+                    </div>
+
+                    <div id="confessionNotesList" class="mt-3 space-y-2">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 4: COMMUNITY & PRAYER WALL (مجتمع الكنيسة) -->
+            <!-- ========================================== -->
+            <div id="view-community" class="hidden space-y-4">
+                <!-- Submit a Prayer Request -->
+                <div class="bg-white dark:bg-midnight-card rounded-3xl p-4 border border-gold/20">
+                    <h2 class="text-base font-extrabold text-burgundy dark:text-gold-light flex items-center gap-2">
+                        <i class="fa-solid fa-hands-holding-circle"></i>
+                        حائط الصلاة المشتركة
+                    </h2>
+                    <p class="text-xs text-stone-500 dark:text-stone-400 mt-0.5 mb-3">«صَلُّوا بَعْضُكُمْ لأَجْلِ بَعْضٍ لِكَيْ تُشْفَوْا» (يعقوب ٥: ١٦)</p>
+
+                    <div class="space-y-2.5">
+                        <textarea id="newPrayerInput" rows="2" placeholder="اكتب طلبة صلاة من أجل مريض، امتحان، أو ضيقة روحية (يمكنك النشر بدون اسم)..." class="w-full p-3 rounded-2xl bg-parchment dark:bg-slate-900 border border-gold/25 text-xs focus:outline-none focus:border-gold"></textarea>
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-300 cursor-pointer">
+                                <input id="anonPrayerCheck" type="checkbox" class="accent-burgundy rounded">
+                                <span>نشر كـ «ابن/ابنة للكنيسة» (بدون اسم)</span>
+                            </label>
+                            <button onclick="addPrayerRequest()" class="px-4 py-2 rounded-xl gold-gradient text-stone-950 font-bold text-xs shadow-sm">
+                                نشر طلبة الصلاة 🙏
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prayer Wall Feed -->
+                <div id="prayerWallList" class="space-y-3">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 5: PROFILE & SPIRITUAL STATS (حسابي)    -->
+            <!-- ========================================== -->
+            <div id="view-profile" class="hidden space-y-4">
+                <div class="bg-white dark:bg-midnight-card rounded-3xl p-5 border border-gold/20 text-center relative overflow-hidden">
+                    <div class="w-20 h-20 rounded-full hero-gradient mx-auto flex items-center justify-center text-gold-light text-2xl font-extrabold border-4 border-gold/40 shadow-md">
+                        مينا
+                    </div>
+                    <h2 class="mt-2.5 text-base font-extrabold text-stone-800 dark:text-white">مينا جرجس عبد المسيح</h2>
+                    <p class="text-xs text-stone-500 dark:text-stone-400">خادم بأسرة القديس أثناسيوس الرسولي • كنيسة السيدة العذراء</p>
+
+                    <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-stone-200/70 dark:border-slate-800">
+                        <div class="p-2 rounded-2xl bg-parchment/70 dark:bg-slate-900">
+                            <span class="block text-lg font-extrabold text-burgundy dark:text-gold-light">٧ أيام</span>
+                            <span class="text-[10px] text-stone-500">مواظبة متتالية</span>
+                        </div>
+                        <div class="p-2 rounded-2xl bg-parchment/70 dark:bg-slate-900">
+                            <span class="block text-lg font-extrabold text-burgundy dark:text-gold-light">٢٤ أصحاح</span>
+                            <span class="text-[10px] text-stone-500">قراءات هذا الشهر</span>
+                        </div>
+                        <div class="p-2 rounded-2xl bg-parchment/70 dark:bg-slate-900">
+                            <span id="profilePrayedCount" class="block text-lg font-extrabold text-burgundy dark:text-gold-light">١٨ مرة</span>
+                            <span class="text-[10px] text-stone-500">صليت لأجل إخوتك</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Favorite Verses -->
+                <div class="bg-white dark:bg-midnight-card rounded-3xl p-4 border border-gold/20">
+                    <h3 class="text-sm font-bold text-stone-800 dark:text-white mb-2.5 flex items-center gap-2">
+                        <i class="fa-solid fa-heart text-burgundy dark:text-gold-light"></i>
+                        آياتي المفضلة المحفوظة
+                    </h3>
+                    <div id="savedVersesList" class="space-y-2 text-xs">
+                        <div class="p-3 rounded-2xl bg-parchment/70 dark:bg-slate-900 border border-gold/20">
+                            <p class="font-verse text-base font-bold text-stone-800 dark:text-stone-100">«تَعَالَوْا إِلَيَّ يَا جَمِيعَ الْمُتْعَبِينَ وَالثَّقِيلِي الأَحْمَالِ، وَأَنَا أُرِيحُكُمْ»</p>
+                            <span class="text-[10px] text-burgundy dark:text-gold-light font-bold">— متى ١١: ٢٨</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- STICKY MINI AUDIO PLAYER (Appears above Bottom Nav when active) -->
+        <div id="miniAudioPlayer" class="hidden absolute bottom-[72px] inset-x-3 bg-stone-900/95 dark:bg-slate-900/95 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl shadow-xl border border-gold/40 z-30 flex items-center justify-between transition-all">
+            <div class="flex items-center gap-3 truncate">
+                <button onclick="togglePlayPauseAudio()" class="w-9 h-9 rounded-xl gold-gradient text-stone-950 flex items-center justify-center shrink-0 shadow">
+                    <i id="miniPlayerPlayIcon" class="fa-solid fa-pause text-xs"></i>
+                </button>
+                <div class="truncate">
+                    <div class="flex items-center gap-2">
+                        <p id="miniPlayerTitle" class="text-xs font-bold text-amber-100 truncate">تأمل الصباح: أتحبني أكثر من هؤلاء؟</p>
+                        <div id="soundWaveContainer" class="playing flex items-end gap-0.5 h-4 shrink-0">
+                            <span class="wave-bar wave-1"></span>
+                            <span class="wave-bar wave-2"></span>
+                            <span class="wave-bar wave-3"></span>
+                            <span class="wave-bar wave-4"></span>
+                        </div>
+                    </div>
+                    <p id="miniPlayerSubtitle" class="text-[10px] text-stone-400 truncate">أبونا داود لمعي • ٣:٤٥ د</p>
+                </div>
+            </div>
+            <button onclick="closeAudioPlayer()" class="w-7 h-7 rounded-lg hover:bg-white/10 text-stone-400 hover:text-white flex items-center justify-center shrink-0 mr-2">
+                <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+        </div>
+
+        <!-- BOTTOM NAVIGATION BAR (5 TABS) -->
+        <nav class="absolute bottom-0 inset-x-0 bg-white/95 dark:bg-midnight-card/95 backdrop-blur-md border-t border-gold/20 px-3 py-2 flex items-center justify-around z-30">
+            <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex flex-col items-center gap-1 px-3 py-1 rounded-xl text-burgundy dark:text-gold-light font-bold transition">
+                <i class="fa-solid fa-house-chimney text-base"></i>
+                <span class="text-[10px]">الرئيسية</span>
+            </button>
+            <button onclick="switchTab('agpeya')" id="nav-agpeya" class="nav-btn flex flex-col items-center gap-1 px-3 py-1 rounded-xl text-stone-400 dark:text-stone-400 font-medium transition">
+                <i class="fa-solid fa-book-open-reader text-base"></i>
+                <span class="text-[10px]">الأجبية والكتاب</span>
+            </button>
+            <button onclick="switchTab('rule')" id="nav-rule" class="nav-btn flex flex-col items-center gap-1 px-3 py-1 rounded-xl text-stone-400 dark:text-stone-400 font-medium transition">
+                <i class="fa-solid fa-check-double text-base"></i>
+                <span class="text-[10px]">قانوني الروحي</span>
+            </button>
+            <button onclick="switchTab('community')" id="nav-community" class="nav-btn flex flex-col items-center gap-1 px-3 py-1 rounded-xl text-stone-400 dark:text-stone-400 font-medium transition">
+                <i class="fa-solid fa-hands-praying text-base"></i>
+                <span class="text-[10px]">مجتمع الكنيسة</span>
+            </button>
+            <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center gap-1 px-3 py-1 rounded-xl text-stone-400 dark:text-stone-400 font-medium transition">
+                <i class="fa-solid fa-user-check text-base"></i>
+                <span class="text-[10px]">حسابي</span>
+            </button>
+        </nav>
+
+        <!-- ========================================== -->
+        <!-- MODALS INSIDE PHONE FRAME                  -->
+        <!-- ========================================== -->
+
+        <!-- 1. Synaxarium / Coptic Calendar Modal -->
+        <div id="synaxariumModal" class="hidden absolute inset-0 bg-black/60 backdrop-blur-xs z-40 flex items-end justify-center p-3">
+            <div class="bg-ivory dark:bg-midnight-card w-full rounded-3xl p-5 border border-gold/30 shadow-2xl space-y-3 animate-slide-up">
+                <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-burgundy/10 dark:bg-gold/20 text-burgundy dark:text-gold-light text-xs font-bold">السنكسار القبطي اليومي • ٢٣ بابة</span>
+                    <button onclick="closeModal('synaxariumModal')" class="w-8 h-8 rounded-full bg-stone-200 dark:bg-slate-800 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <h3 class="font-bold text-base text-stone-800 dark:text-white">استشهاد القديس ديونيسيوس أسقف كورنثوس</h3>
+                <p class="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                    في مثل هذا اليوم استشهد القديس ديونيسيوس أسقف مدينة كورنثوس. كان منذ حداثته محباً للعلوم الكنسية، فرسموه أسقفاً على كورنثوس، فأنار الرعية بتعاليمه ورسائله الرعوية العميقة، واحتمل عذابات كثيرة على اسم السيد المسيح حتى نال إكليل الشهادة. بركة صلواته فلتكن معنا آمين.
+                </p>
+                <button onclick="closeModal('synaxariumModal')" class="w-full py-2.5 rounded-xl hero-gradient text-white text-xs font-bold">بركة صلواته تكون معنا • آمين</button>
+            </div>
+        </div>
+
+        <!-- 2. Hymns & Audio Library Modal -->
+        <div id="hymnsModal" class="hidden absolute inset-0 bg-black/60 backdrop-blur-xs z-40 flex items-end justify-center p-3">
+            <div class="bg-ivory dark:bg-midnight-card w-full rounded-3xl p-5 border border-gold/30 shadow-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-extrabold text-base text-burgundy dark:text-gold-light flex items-center gap-2">
+                        <i class="fa-solid fa-music"></i> مكتبة الترانيم والتأملات
+                    </h3>
+                    <button onclick="closeModal('hymnsModal')" class="w-8 h-8 rounded-full bg-stone-200 dark:bg-slate-800 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-2">
+                    <button onclick="toggleAudioMeditation('ترنيمة: أتحبني؟ نعم يا رب أنت تعلم', 'فريق التسبيح القبطي • ٤:٢٠ د'); closeModal('hymnsModal')" class="w-full p-3 rounded-2xl bg-white dark:bg-slate-900 border border-gold/20 flex items-center justify-between text-right hover:border-gold transition">
+                        <div class="flex items-center gap-3">
+                            <span class="w-9 h-9 rounded-xl hero-gradient text-gold-light flex items-center justify-center"><i class="fa-solid fa-play text-xs"></i></span>
+                            <div>
+                                <p class="text-xs font-bold text-stone-800 dark:text-white">ترنيمة: أتحبني؟ نعم يا رب أنت تعلم</p>
+                                <p class="text-[10px] text-stone-500">فريق التسبيح القبطي • ٤:٢٠ د</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-headphones text-gold"></i>
+                    </button>
+                    <button onclick="toggleAudioMeditation('لحن إبؤورو (يا ملك السلام)', 'المعلم إبراهيم عياد • ٥:١٥ د'); closeModal('hymnsModal')" class="w-full p-3 rounded-2xl bg-white dark:bg-slate-900 border border-gold/20 flex items-center justify-between text-right hover:border-gold transition">
+                        <div class="flex items-center gap-3">
+                            <span class="w-9 h-9 rounded-xl hero-gradient text-gold-light flex items-center justify-center"><i class="fa-solid fa-play text-xs"></i></span>
+                            <div>
+                                <p class="text-xs font-bold text-stone-800 dark:text-white">لحن إبؤورو (يا ملك السلام أعطنا سلامك)</p>
+                                <p class="text-[10px] text-stone-500">خورس الكنيسة • ٥:١٥ د</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-headphones text-gold"></i>
+                    </button>
+                    <button onclick="toggleAudioMeditation('تأمل المساء: كيف أسمع صوت الله بقلبي؟', 'قداسة البابا شنودة الثالث • ٦:١٠ د'); closeModal('hymnsModal')" class="w-full p-3 rounded-2xl bg-white dark:bg-slate-900 border border-gold/20 flex items-center justify-between text-right hover:border-gold transition">
+                        <div class="flex items-center gap-3">
+                            <span class="w-9 h-9 rounded-xl hero-gradient text-gold-light flex items-center justify-center"><i class="fa-solid fa-play text-xs"></i></span>
+                            <div>
+                                <p class="text-xs font-bold text-stone-800 dark:text-white">تأمل المساء: كيف أسمع صوت الله؟</p>
+                                <p class="text-[10px] text-stone-500">تأملات آبائية • ٦:١٠ د</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-headphones text-gold"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Notifications Modal -->
+        <div id="notificationsModal" class="hidden absolute inset-0 bg-black/60 backdrop-blur-xs z-40 flex items-end justify-center p-3">
+            <div class="bg-ivory dark:bg-midnight-card w-full rounded-3xl p-5 border border-gold/30 shadow-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-extrabold text-base text-burgundy dark:text-gold-light">إشعارات الرعاية الروحية</h3>
+                    <button onclick="closeModal('notificationsModal')" class="w-8 h-8 rounded-full bg-stone-200 dark:bg-slate-800 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-2 text-xs">
+                    <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border-r-4 border-gold">
+                        <p class="font-bold text-stone-800 dark:text-white">🙏 ١٢ شخصاً صلوا من أجل طلبتك اليوم</p>
+                        <p class="text-[11px] text-stone-500 mt-0.5">في حائط الصلاة المشتركة بالكنيسة • منذ ساعة</p>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border-r-4 border-burgundy">
+                        <p class="font-bold text-stone-800 dark:text-white">⛪ تذكير بحجز موعد الاعتراف الشهري</p>
+                        <p class="text-[11px] text-stone-500 mt-0.5">أبونا يوحنا متاح يوم السبت القادم عقب صلاة العشية</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Ask Spiritual Father Modal -->
+        <div id="askFatherModal" class="hidden absolute inset-0 bg-black/60 backdrop-blur-xs z-40 flex items-end justify-center p-3">
+            <div class="bg-ivory dark:bg-midnight-card w-full rounded-3xl p-5 border border-gold/30 shadow-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-extrabold text-base text-burgundy dark:text-gold-light">رسالة خاصة لأب الاعتراف</h3>
+                    <button onclick="closeModal('askFatherModal')" class="w-8 h-8 rounded-full bg-stone-200 dark:bg-slate-800 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p class="text-xs text-stone-500 dark:text-stone-400">أرسل سؤالك الروحي أو اطلب موعد جلسة اعتراف مع أبونا يوحنا بسرية تامة.</p>
+                <textarea id="fatherQuestionInput" rows="3" placeholder="قدس أبونا، أرجو صلواتكم وأود السؤال عن..." class="w-full p-3 rounded-2xl bg-white dark:bg-slate-900 border border-gold/30 text-xs focus:outline-none"></textarea>
+                <button onclick="submitFatherQuestion()" class="w-full py-2.5 rounded-xl gold-gradient text-stone-950 font-bold text-xs">إرسال الرسالة لأبونا 🕊️</button>
+            </div>
+        </div>
+
+        <!-- Custom Toast Notification inside Phone Frame -->
+        <div id="toastMessage" class="pointer-events-none opacity-0 transition-all duration-300 absolute top-16 inset-x-5 bg-stone-900/95 dark:bg-amber-100 text-white dark:text-stone-950 px-4 py-2.5 rounded-2xl shadow-xl border border-gold text-xs font-bold flex items-center justify-center gap-2 z-50 text-center">
+            <i class="fa-solid fa-circle-check text-gold dark:text-burgundy"></i>
+            <span id="toastText">تم بنجاح</span>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- APPLICATION JAVASCRIPT LOGIC               -->
+    <!-- ========================================== -->
+    <script>
+        // 1. Biblical Verses Pool
+        const dailyVerses = [
+            {
+                text: "«يَا سِمْعَانُ بْنَ يُونَا، أَتُحِبُّنِي أَكْثَرَ مِنْ هؤُلاءِ؟ قَالَ لَهُ: نَعَمْ يَا رَبُّ أَنْتَ تَعْلَمُ أَنِّي أُحِبُّكَ. قَالَ لَهُ: ارْعَ خِرَافِي»",
+                ref: "— إنجيل يوحنا ٢١: ١٥"
+            },
+            {
+                text: "«تَعَالَوْا إِلَيَّ يَا جَمِيعَ الْمُتْعَبِينَ وَالثَّقِيلِي الأَحْمَالِ، وَأَنَا أُرِيحُكُمْ»",
+                ref: "— إنجيل متى ١١: ٢٨"
+            },
+            {
+                text: "«سَلاَمًا أَتْرُكُ لَكُمْ. سَلاَمِي أُعْطِيكُمْ. لَيْسَ كَمَا يُعْطِي الْعَالَمُ أُعْطِيكُمْ أَنَا. لاَ تَضْطَرِبْ قُلُوبُكُمْ وَلاَ تَرْهَبْ»",
+                ref: "— إنجيل يوحنا ١٤: ٢٧"
+            },
+            {
+                text: "«أَسْتَطِيعُ كُلَّ شَيْءٍ فِي الْمَسِيحِ الَّذِي يُقَوِّينِي»",
+                ref: "— فيلبي ٤: ١٣"
+            }
+        ];
+        let currentVerseIndex = 0;
+        let isCurrentVerseFav = false;
+
+        // 2. Daily Spiritual Rule Checklist Data
+        let spiritualTasks = [
+            { id: 1, title: "صلاة باكر (الأجبية)", subtitle: "١٠ دقائق • مزامير الصباح", completed: true, icon: "fa-sun" },
+            { id: 2, title: "قراءة الإنجيل اليومي", subtitle: "يوحنا الأصحاح ٢١", completed: true, icon: "fa-book-bible" },
+            { id: 3, title: "خلوة شخصية هادئة", subtitle: "حديث قلبي مع المسيح", completed: false, icon: "fa-heart" },
+            { id: 4, title: "عمل محبة أو افتقاد", subtitle: "السؤال عن أخ أو محتاج", completed: false, icon: "fa-hand-holding-heart" }
+        ];
+
+        // 3. Agpeya Canonical Hours Data
+        const agpeyaHours = [
+            {
+                id: "baker",
+                name: "صلاة باكر",
+                time: "٦:٠٠ ص",
+                theme: "تذكار قيامة السيد المسيح وتقديم باكورة اليوم لله",
+                psalmTitle: "المزمور الخمسون (ارحمني يا الله كعظيم رحمتك)",
+                prayerText: "هلمّ نسجد، هلمّ نسأل المسيح إلهنا.. أيها النور الحقيقي الذي يضيء لكل إنسان آتياً إلى العالم، أتيتَ إلى العالم بمحبتك للبشر، وكل الخليقة تهللت بمجيئك. احفظنا في هذا اليوم بغير خطية يا رب."
+            },
+            {
+                id: "terce",
+                name: "الساعة الثالثة",
+                time: "٩:٠٠ ص",
+                theme: "تذكار حلول الروح القدس على التلاميذ الأبرار",
+                psalmTitle: "من مزامير الساعة الثالثة (الرب يرعاني فلا يعوزني شيء)",
+                prayerText: "روحك القدوس يا رب الذي أرسلته على تلاميذك القديسين ورسلك المكرمين في الساعة الثالثة، هذا لا تنزعه منا أيها الصالح، لكن جدده في أحشائنا. قلباً نقياً اخلق فيّ يا الله."
+            },
+            {
+                id: "sext",
+                name: "الساعة السادسة",
+                time: "١٢:٠٠ ظ",
+                theme: "تذكار صلب ربنا يسوع المسيح الخلاصي",
+                psalmTitle: "قطعة الساعة السادسة (يا من في اليوم السادس)",
+                prayerText: "يا من في اليوم السادس وفي الساعة السادسة سمرت على الصليب من أجل الخطية التي تجرأ عليها آدم في الفردوس، مزق صك خطايانا أيها المسيح إلهنا وخلصنا."
+            },
+            {
+                id: "none",
+                name: "الساعة التاسعة",
+                time: "٣:٠٠ م",
+                theme: "تذكار تسليم الرب روحه الطاهرة وقبول اللص اليمين",
+                psalmTitle: "إنجيل لوقا (اذكرني يا رب متى جئت في ملكوتك)",
+                prayerText: "يا من ذاق الموت بالجسد في الساعة التاسعة من أجلنا نحن الخطاة، أمت حواسنا الجسدية أيها المسيح إلهنا ونجنا. اذكرنا يا رب متى جئت في ملكوتك."
+            },
+            {
+                id: "vespers",
+                name: "صلاة الغروب",
+                time: "٥:٠٠ م",
+                theme: "شكر الله على حفظه لنا طوال النهار وتذكار إنزال جسد الرب",
+                psalmTitle: "مزامير الغروب (فرحت بالقائلين لي إلى بيت الرب نذهب)",
+                prayerText: "نشكرك يا ملكنا المتحنن لأنك منحتنا أن نعبر هذا اليوم بسلام، وأتيت بنا إلى المساء شاكرين، وجعلتنا أهلاً أن نعاين النور إلى المساء."
+            },
+            {
+                id: "compline",
+                name: "صلاة النوم",
+                time: "٩:٠٠ م",
+                theme: "تذكار دفن السيد المسيح والاستعداد لليوم الأخير بالتوبة",
+                psalmTitle: "من صلاة النوم (هوذا أنا عتيد أن أقف أمام الديان العادل)",
+                prayerText: "يا رب أنعم علينا بليلة هادئة ونوم طاهر من كل قلق، وأرسل لنا ملاك السلام ليحرس نفوسنا وأجسادنا، واغفر لنا كل ما أخطأنا به اليوم بالفعل أو القول أو الفكر."
+            }
+        ];
+        let activeAgpeyaId = "baker";
+
+        // 4. Confession Private Notes
+        let confessionNotes = [
+            { id: 1, text: "التسرع في الغضب أثناء ضغط العمل هذا الأسبوع", date: "منذ يومين" },
+            { id: 2, text: "التكاسل في صلاة النوم مرتين بسبب السهر على الهاتف", date: "أمس" }
+        ];
+
+        // 5. Community Prayer Wall Data
+        let prayerRequests = [
+            {
+                id: 101,
+                author: "مارينا صموئيل",
+                time: "منذ ٢٠ دقيقة",
+                text: "أرجو صلواتكم من أجل والدي لأنه يخضع لعملية جراحية دقيقة غداً صباحاً، لكي يمد الرب يده الشافية.",
+                prayedCount: 34,
+                userPrayed: false
+            },
+            {
+                id: 102,
+                author: "ابن للكنيسة",
+                time: "منذ ساعتين",
+                text: "صلوا من أجلي لكي يعطيني الله سلاماً داخلياً وإرشاداً في قرار مصيري يخص مستقبلي وأسرتي.",
+                prayedCount: 21,
+                userPrayed: false
+            },
+            {
+                id: 103,
+                author: "أبانوب عادل",
+                time: "منذ ٤ ساعات",
+                text: "صلاة شكر لله على استجابته لطلبتنا ونجاح خدمة مؤتمر الشباب الكنسي هذا الأسبوع ببركة كبيرة.",
+                prayedCount: 49,
+                userPrayed: true
+            }
+        ];
+        let totalUserPrayedCounter = 18;
+
+        // Gentle Web Audio Bell Chime via Tone.js
+        function playGentleChime() {
+            try {
+                if (typeof Tone !== 'undefined') {
+                    const synth = new Tone.Synth({
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.02, decay: 0.3, sustain: 0.1, release: 0.8 }
+                    }).toDestination();
+                    synth.volume.value = -14;
+                    synth.triggerAttackRelease("G5", "8n");
+                }
+            } catch (e) {
+                // Silent fallback if audio context is blocked
+            }
+        }
+
+        // Render Spiritual Checklist (both Home & Rule Tab)
+        function renderChecklist() {
+            const homeContainer = document.getElementById('homeChecklistContainer');
+            const fullContainer = document.getElementById('fullChecklistContainer');
+
+            const completedCount = spiritualTasks.filter(t => t.completed).length;
+            const percent = Math.round((completedCount / spiritualTasks.length) * 100);
+
+            document.getElementById('ruleProgressBar').style.width = `${percent}%`;
+            document.getElementById('ruleProgressBadge').textContent = `${toArabicDigits(percent)}٪ مكتمل`;
+
+            // Home Compact Cards
+            homeContainer.innerHTML = spiritualTasks.slice(0, 4).map(task => `
+                <button onclick="toggleTask(${task.id})" class="p-3 rounded-2xl border text-right transition flex items-start gap-2.5 ${
+                    task.completed
+                        ? 'bg-emerald-500/10 border-emerald-500/30 dark:bg-emerald-500/15'
+                        : 'bg-parchment/60 dark:bg-slate-800/70 border-gold/20 hover:border-gold'
+                }">
+                    <div class="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
+                        task.completed
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-white dark:bg-slate-700 border border-stone-300 dark:border-slate-600 text-transparent'
+                    }">
+                        <i class="fa-solid fa-check text-[10px]"></i>
+                    </div>
+                    <div class="truncate">
+                        <p class="text-xs font-bold truncate ${task.completed ? 'line-through text-stone-400 dark:text-stone-400' : 'text-stone-800 dark:text-stone-100'}">${task.title}</p>
+                        <p class="text-[10px] text-stone-500 dark:text-stone-400 truncate">${task.subtitle}</p>
+                    </div>
+                </button>
+            `).join('');
+
+            // Full Rule View Cards
+            fullContainer.innerHTML = spiritualTasks.map(task => `
+                <div onclick="toggleTask(${task.id})" class="p-3.5 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
+                    task.completed
+                        ? 'bg-emerald-500/10 border-emerald-500/30'
+                        : 'bg-parchment/60 dark:bg-slate-900 border-gold/20'
+                }">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-burgundy/10 dark:bg-gold/15 text-burgundy dark:text-gold-light flex items-center justify-center">
+                            <i class="fa-solid ${task.icon}"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold ${task.completed ? 'line-through text-stone-400' : 'text-stone-800 dark:text-white'}">${task.title}</p>
+                            <p class="text-[11px] text-stone-500">${task.subtitle}</p>
+                        </div>
+                    </div>
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center ${
+                        task.completed ? 'bg-emerald-600 text-white' : 'border-2 border-stone-300 dark:border-slate-600'
+                    }">
+                        ${task.completed ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleTask(id) {
+            const task = spiritualTasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                playGentleChime();
+                renderChecklist();
+                if (task.completed) {
+                    showToast(`الرب يبارك أمانتك في: ${task.title} ✨`);
+                }
+            }
+        }
+
+        function addCustomSpiritualTask() {
+            const newId = Date.now();
+            spiritualTasks.push({
+                id: newId,
+                title: "تسبحة ومطانيات المساء",
+                subtitle: "بند روحي مضاف اليوم",
+                completed: false,
+                icon: "fa-star"
+            });
+            renderChecklist();
+            showToast("تمت إضافة البند إلى قانونك الروحي بنجاح 🙏");
+        }
+
+        // Render Agpeya Hours
+        function renderAgpeya() {
+            const tabsEl = document.getElementById('agpeyaHoursTabs');
+            const contentEl = document.getElementById('agpeyaContentBox');
+
+            tabsEl.innerHTML = agpeyaHours.map(hour => `
+                <button onclick="selectAgpeyaHour('${hour.id}')" class="px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition ${
+                    hour.id === activeAgpeyaId
+                        ? 'hero-gradient text-white shadow-sm'
+                        : 'bg-parchment dark:bg-slate-800 text-stone-600 dark:text-stone-300 hover:bg-gold/20'
+                }">
+                    ${hour.name}
+                </button>
+            `).join('');
+
+            const activeHour = agpeyaHours.find(h => h.id === activeAgpeyaId);
+            contentEl.innerHTML = `
+                <div class="flex items-center justify-between border-b border-gold/20 pb-2">
+                    <div>
+                        <span class="text-xs font-extrabold text-burgundy dark:text-gold-light">${activeHour.name} (${activeHour.time})</span>
+                        <p class="text-[11px] text-stone-500 dark:text-stone-400">${activeHour.theme}</p>
+                    </div>
+                    <button onclick="toggleAudioMeditation('${activeHour.name} مسموعة', 'صلوات الأجبية القبطية')" class="px-2.5 py-1 rounded-lg gold-gradient text-stone-950 text-[11px] font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-play text-[9px]"></i> استماع
+                    </button>
+                </div>
+                <p class="text-xs font-bold text-stone-700 dark:text-stone-300">${activeHour.psalmTitle}</p>
+                <p class="font-verse text-lg leading-relaxed text-stone-800 dark:text-amber-50">${activeHour.prayerText}</p>
+                <div class="pt-2 flex justify-end">
+                    <button onclick="markAgpeyaDone('${activeHour.name}')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> أتممت صلاة هذه الساعة
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectAgpeyaHour(id) {
+            activeAgpeyaId = id;
+            renderAgpeya();
+        }
+
+        function markAgpeyaDone(hourName) {
+            playGentleChime();
+            showToast(`تقبل الله صلاتك في ${hourName} 🕊️`);
+        }
+
+        // Render Confession Notes
+        function renderConfessionNotes() {
+            const container = document.getElementById('confessionNotesList');
+            container.innerHTML = confessionNotes.map(note => `
+                <div class="p-3 rounded-2xl bg-parchment/60 dark:bg-slate-900 border border-gold/20 flex items-center justify-between text-xs">
+                    <div>
+                        <p class="font-semibold text-stone-800 dark:text-stone-200">${note.text}</p>
+                        <span class="text-[10px] text-stone-400">${note.date}</span>
+                    </div>
+                    <button onclick="deleteConfessionNote(${note.id})" class="text-stone-400 hover:text-rose-500 px-2">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addConfessionNote() {
+            const input = document.getElementById('confessionNoteInput');
+            const val = input.value.trim();
+            if (!val) return;
+            confessionNotes.unshift({ id: Date.now(), text: val, date: "الآن" });
+            input.value = "";
+            renderConfessionNotes();
+            showToast("تم حفظ الملاحظة بسرية في مفكرة التوبة 🔒");
+        }
+
+        function deleteConfessionNote(id) {
+            confessionNotes = confessionNotes.filter(n => n.id !== id);
+            renderConfessionNotes();
+        }
+
+        // Render Community Prayer Wall
+        function renderPrayerWall() {
+            const container = document.getElementById('prayerWallList');
+            container.innerHTML = prayerRequests.map(req => `
+                <div class="bg-white dark:bg-midnight-card rounded-3xl p-4 border border-gold/20 shadow-xs space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-burgundy/10 dark:bg-gold/20 text-burgundy dark:text-gold-light flex items-center justify-center font-bold text-xs">
+                                ${req.author.charAt(0)}
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-stone-800 dark:text-white">${req.author}</p>
+                                <p class="text-[10px] text-stone-400">${req.time}</p>
+                            </div>
+                        </div>
+                        <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold">
+                            ${toArabicDigits(req.prayedCount)} يصلون لأجله
+                        </span>
+                    </div>
+                    <p class="text-xs text-stone-700 dark:text-stone-200 leading-relaxed">${req.text}</p>
+                    <div class="pt-1 flex justify-end">
+                        <button onclick="prayForRequest(${req.id})" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                            req.userPrayed
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-parchment dark:bg-slate-800 text-burgundy dark:text-gold-light hover:bg-gold/20'
+                        }">
+                            <i class="fa-solid fa-hands-praying"></i>
+                            <span>${req.userPrayed ? 'صليت لأجلك 🙏' : 'أصلي لأجلك الآن'}</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function prayForRequest(id) {
+            const req = prayerRequests.find(r => r.id === id);
+            if (req && !req.userPrayed) {
+                req.userPrayed = true;
+                req.prayedCount += 1;
+                totalUserPrayedCounter += 1;
+                document.getElementById('profilePrayedCount').textContent = `${toArabicDigits(totalUserPrayedCounter)} مرة`;
+                playGentleChime();
+                renderPrayerWall();
+                showToast(`شكراً لمحبتك! الرب يستجيب صلاتك من أجل ${req.author} 🙏`);
+            }
+        }
+
+        function addPrayerRequest() {
+            const input = document.getElementById('newPrayerInput');
+            const isAnon = document.getElementById('anonPrayerCheck').checked;
+            const text = input.value.trim();
+            if (!text) {
+                showToast("يرجى كتابة طلبة الصلاة أولاً");
+                return;
+            }
+            prayerRequests.unshift({
+                id: Date.now(),
+                author: isAnon ? "ابن للكنيسة" : "مينا جرجس",
+                time: "الآن",
+                text: text,
+                prayedCount: 1,
+                userPrayed: true
+            });
+            input.value = "";
+            renderPrayerWall();
+            showToast("تم رفع طلبة صلاتك ليصلي معك إخوتك في الكنيسة 🕯️");
+        }
+
+        // Daily Verse Actions
+        function cycleDailyVerse() {
+            currentVerseIndex = (currentVerseIndex + 1) % dailyVerses.length;
+            const v = dailyVerses[currentVerseIndex];
+            document.getElementById('heroVerseText').textContent = v.text;
+            document.getElementById('heroVerseRef').textContent = v.ref;
+            isCurrentVerseFav = false;
+            document.getElementById('favVerseBtn').innerHTML = '<i class="fa-regular fa-heart"></i>';
+        }
+
+        function toggleFavoriteVerse() {
+            isCurrentVerseFav = !isCurrentVerseFav;
+            const btn = document.getElementById('favVerseBtn');
+            const v = dailyVerses[currentVerseIndex];
+
+            if (isCurrentVerseFav) {
+                btn.innerHTML = '<i class="fa-solid fa-heart text-rose-400"></i>';
+                const list = document.getElementById('savedVersesList');
+                const card = document.createElement('div');
+                card.className = "p-3 rounded-2xl bg-parchment/70 dark:bg-slate-900 border border-gold/20";
+                card.innerHTML = `
+                    <p class="font-verse text-base font-bold text-stone-800 dark:text-stone-100">${v.text}</p>
+                    <span class="text-[10px] text-burgundy dark:text-gold-light font-bold">${v.ref}</span>
+                `;
+                list.prepend(card);
+                showToast("تم حفظ الآية في مفضلتك الروحية ❤️");
+            } else {
+                btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+            }
+        }
+
+        function copyDailyVerse() {
+            const v = dailyVerses[currentVerseIndex];
+            const shareString = `${v.text} ${v.ref} — عبر تطبيق أتحبني؟ الكنسي`;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = shareString;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast("تم نسخ الآية لمشاركتها مع أحبائك 📋");
+        }
+
+        // Simulated Audio Meditation Player
+        let isAudioPlaying = false;
+        function toggleAudioMeditation(title, subtitle) {
+            const player = document.getElementById('miniAudioPlayer');
+            document.getElementById('miniPlayerTitle').textContent = title;
+            document.getElementById('miniPlayerSubtitle').textContent = subtitle;
+            player.classList.remove('hidden');
+            isAudioPlaying = true;
+            updateAudioPlayerUI();
+            playGentleChime();
+            showToast(`جاري تشغيل: ${title} 🎧`);
+        }
+
+        function togglePlayPauseAudio() {
+            isAudioPlaying = !isAudioPlaying;
+            updateAudioPlayerUI();
+        }
+
+        function updateAudioPlayerUI() {
+            const icon = document.getElementById('miniPlayerPlayIcon');
+            const wave = document.getElementById('soundWaveContainer');
+            if (isAudioPlaying) {
+                icon.className = "fa-solid fa-pause text-xs";
+                wave.classList.add('playing');
+            } else {
+                icon.className = "fa-solid fa-play text-xs";
+                wave.classList.remove('playing');
+            }
+        }
+
+        function closeAudioPlayer() {
+            isAudioPlaying = false;
+            document.getElementById('miniAudioPlayer').classList.add('hidden');
+        }
+
+        // Bottom Navigation Tab Switching
+        function switchTab(tabName) {
+            const views = ['home', 'agpeya', 'rule', 'community', 'profile'];
+            views.forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${v}`);
+                navBtn.className = "nav-btn flex flex-col items-center gap-1 px-3 py-1 rounded-xl text-stone-400 dark:text-stone-400 font-medium transition";
+            });
+
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            activeBtn.className = "nav-btn flex flex-col items-center gap-1 px-3 py-1 rounded-xl text-burgundy dark:text-gold-light font-bold transition scale-105";
+
+            document.getElementById('mainScrollArea').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Modals & Helpers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+        function openKatamerosModal() {
+            switchTab('agpeya');
+            showToast("تم فتح قراءات القطمارس والإنجيل اليومي 📖");
+        }
+        function openHymnsModal() {
+            openModal('hymnsModal');
+        }
+        function openAskFatherModal() {
+            openModal('askFatherModal');
+        }
+        function submitFatherQuestion() {
+            const input = document.getElementById('fatherQuestionInput');
+            if (!input.value.trim()) {
+                showToast("اكتب رسالتك لأبونا أولاً");
+                return;
+            }
+            input.value = "";
+            closeModal('askFatherModal');
+            showToast("تم إرسال رسالتك لأبونا يوحنا بنجاح 🕊️");
+        }
+
+        function toggleReminder(btnEl, eventTitle) {
+            const isSet = btnEl.dataset.reminded === "true";
+            if (!isSet) {
+                btnEl.dataset.reminded = "true";
+                btnEl.className = "mt-3 w-full py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold transition flex items-center justify-center gap-1.5";
+                btnEl.innerHTML = '<i class="fa-solid fa-check"></i><span>مُفعّل التذكير</span>';
+                playGentleChime();
+                showToast(`سيتم تذكيرك بموعد ${eventTitle} 🔔`);
+            } else {
+                btnEl.dataset.reminded = "false";
+                btnEl.className = "mt-3 w-full py-1.5 rounded-xl bg-parchment dark:bg-slate-800 text-stone-700 dark:text-stone-200 text-xs font-bold transition flex items-center justify-center gap-1.5";
+                btnEl.innerHTML = '<i class="fa-regular fa-bell"></i><span>تذكيري بالموعد</span>';
+            }
+        }
+
+        // Theme Toggle (Light / Dark Mode)
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            const innerIcon = document.getElementById('innerThemeIcon');
+            const outerIcon = document.getElementById('outerThemeIcon');
+            const outerText = document.getElementById('outerThemeText');
+
+            if (isDark) {
+                innerIcon.className = "fa-solid fa-sun text-sm text-gold-light";
+                outerIcon.className = "fa-solid fa-sun text-gold-light";
+                outerText.textContent = "الوضع النهاري";
+                showToast("تم تفعيل الوضع الليلي الهادئ للصلاة 🌙");
+            } else {
+                innerIcon.className = "fa-solid fa-moon text-sm";
+                outerIcon.className = "fa-solid fa-moon text-burgundy";
+                outerText.textContent = "الوضع الليلي";
+                showToast("تم تفعيل الوضع النهاري الدافئ ☀️");
+            }
+        }
+
+        // Toggle Full-Screen vs Phone Frame on Desktop
+        let isFullScreen = false;
+        function toggleFullScreenMode() {
+            isFullScreen = !isFullScreen;
+            const frame = document.getElementById('phoneFrame');
+            const label = document.getElementById('frameToggleText');
+            if (isFullScreen) {
+                frame.className = "relative w-full max-w-2xl h-[92vh] bg-ivory dark:bg-midnight text-stone-800 dark:text-stone-100 rounded-3xl shadow-2xl border border-gold/30 overflow-hidden flex flex-col transition-all duration-300";
+                label.textContent = "إطار الهاتف";
+            } else {
+                frame.className = "relative w-full sm:w-[420px] h-screen sm:h-[860px] bg-ivory dark:bg-midnight text-stone-800 dark:text-stone-100 sm:rounded-[46px] sm:shadow-2xl sm:border-[10px] sm:border-stone-900 dark:sm:border-slate-800 overflow-hidden flex flex-col transition-all duration-300";
+                label.textContent = "ملء الشاشة";
+            }
+        }
+
+        // Convert numbers to Eastern Arabic numerals
+        function toArabicDigits(num) {
+            const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            return String(num).replace(/[0-9]/g, w => arabicNumbers[+w]);
+        }
+
+        // Toast Feedback
+        let toastTimeout;
+        function showToast(msg) {
+            const toast = document.getElementById('toastMessage');
+            document.getElementById('toastText').textContent = msg;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2600);
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            renderChecklist();
+            renderAgpeya();
+            renderConfessionNotes();
+            renderPrayerWall();
+        };
+    </script>
+</body>
+</html>
